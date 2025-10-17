@@ -4,14 +4,14 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-type SymbolId = "cozy" | "minimal" | "retro" | "nature";
+type SymbolId = "muji" | "cream" | "industrial" | "minimal";
 
 const AVATARS = [1, 2, 3, 4, 5] as const;
 const SYMBOLS: { id: SymbolId; label: string; emoji: string; desc: string }[] = [
-  { id: "cozy",    label: "溫馨",  emoji: "🕯️", desc: "柔和燈光、毛毯與木質調" },
-  { id: "minimal", label: "極簡",  emoji: "📐", desc: "留白、俐落線條與功能優先" },
-  { id: "retro",   label: "復古",  emoji: "📻", desc: "老物件、復古配色與溫度感" },
-  { id: "nature",  label: "自然",  emoji: "🌿", desc: "綠植、原木與自然採光" },
+  { id: "muji", label: "日式無印",   emoji: "🌿", desc: "溫潤自然、木質與棉麻交織的簡約空間" },
+  { id: "cream", label: "奶油雲朵",   emoji: "☁️", desc: "柔霧白與奶油色調營造雲端般的溫柔氛圍" },
+  { id: "industrial", label: "工業", emoji: "⚙️", desc: "鐵件與水泥的對話，冷冽卻有力量" },
+  { id: "minimal", label: "極簡",     emoji: "⬜️", desc: "去除多餘，留白為主的純淨設計" },
 ];
 
 export default function SelectPage() {
@@ -19,18 +19,22 @@ export default function SelectPage() {
   const [avatar, setAvatar] = useState<number | null>(null);
   const [symbol, setSymbol] = useState<SymbolId | null>(null);
 
-  // 回填上次選擇（可選）
+  // 回填上次選擇（若有）
   useEffect(() => {
-    const a = typeof window !== "undefined" ? localStorage.getItem("avatar") : null;
-    const s = typeof window !== "undefined" ? localStorage.getItem("symbol") : null;
+    const a = localStorage.getItem("avatar");
+    const s = localStorage.getItem("symbol") as SymbolId | null;
     if (a) setAvatar(Number(a));
-    if (s && ["cozy","minimal","retro","nature"].includes(s)) setSymbol(s as SymbolId);
+    if (s && ["muji","cream","industrial","minimal"].includes(s)) {
+      setSymbol(s);
+    }
   }, []);
 
   const ready = avatar != null && symbol != null;
 
   const startSwipe = () => {
     if (!ready) return;
+    // 新一輪配對，清除舊進度
+    localStorage.removeItem("swipeIndex");
     localStorage.setItem("avatar", String(avatar));
     localStorage.setItem("symbol", symbol!);
     router.push("/swipe");
@@ -38,15 +42,12 @@ export default function SelectPage() {
 
   return (
     <main className="relative mx-auto min-h-dvh max-w-screen-sm bg-white px-4 pt-16 pb-28">
-      {/* 左上 Logo */}
       <a href="/" className="absolute left-4 top-3 inline-flex items-center" aria-label="首頁">
         <Image src="/ikea.svg" alt="IKEA" width={76} height={30} priority />
       </a>
-
       <h1 className="mt-8 text-xl font-semibold">選擇你的設定</h1>
       <p className="mt-1 text-sm text-gray-600">完成以下兩步驟，開始配對！</p>
 
-      {/* 1. 選頭貼 */}
       <section className="mt-6">
         <h2 className="mb-3 text-base font-semibold">1. 選擇頭貼</h2>
         <div className="grid grid-cols-5 gap-3">
@@ -71,7 +72,6 @@ export default function SelectPage() {
         </div>
       </section>
 
-      {/* 2. 選象徵 */}
       <section className="mt-8">
         <h2 className="mb-3 text-base font-semibold">2. 選擇象徵風格</h2>
         <div className="grid grid-cols-2 gap-3">
@@ -98,7 +98,6 @@ export default function SelectPage() {
         </div>
       </section>
 
-      {/* 底部開始配對 */}
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40">
         <div className="pointer-events-auto mx-auto mb-[env(safe-area-inset-bottom)] max-w-screen-sm px-4 pb-6">
           <button
