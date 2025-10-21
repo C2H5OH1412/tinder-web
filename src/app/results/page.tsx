@@ -7,7 +7,7 @@ import { rooms } from "@/data/rooms";
 import { furnitureByRoom, FurnitureItem } from "@/data/furnitures";
 import { useRouter } from "next/navigation";
 
-// 定義四種象徵風格的型別
+// 定義四種象徵風格
 export type SymbolId = "muji" | "cream" | "industrial" | "minimal";
 
 const THRESHOLD = 80;
@@ -106,7 +106,7 @@ export default function ResultsPage() {
           <p className="text-gray-500">此房間沒有對應的家具資料。</p>
         )}
       </div>
-      {/* 下方控制列：Share、Like、Match */}
+      {/* tab：Share、Like、Match */}
       <nav className="fixed bottom-0 left-0 w-full border-t bg-white/90 backdrop-blur z-40">
         <div className="mx-auto grid max-w-screen-sm grid-cols-3 text-center">
           <button
@@ -135,7 +135,7 @@ export default function ResultsPage() {
             Match
           </button>
         </div>
-        {/* iPhone 安全區留白 */}
+        {/* 留白 */}
         <div className="h-[env(safe-area-inset-bottom)]" />
       </nav>
     </main>

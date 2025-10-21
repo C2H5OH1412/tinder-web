@@ -6,12 +6,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { rooms } from "@/data/rooms";
 
-// 定義四種象徵風格的型別（保留原樣）
+// 定義四種象徵風格的型別
 export type SymbolId = "muji" | "cream" | "industrial" | "minimal";
 
 const THRESHOLD = 80;
 
-// 僅供 UI 用的色票
+// 色票
 const COLOR_BLUE = "#0057AD";
 const COLOR_YELLOW = "#FBDA0C";
 const COLOR_GRAY = "#7e8592";
@@ -19,13 +19,13 @@ const COLOR_GRAY = "#7e8592";
 export default function SwipePage() {
   const router = useRouter();
 
-  // 狀態（保留原樣）
+  // 狀態
   const [selectedSymbol, setSelectedSymbol] = useState<SymbolId | null>(null);
   const [index, setIndex] = useState(0);
   const [dx, setDx] = useState(0);
   const startX = useRef<number | null>(null);
 
-  // 讀取先前儲存的進度（原樣）
+  // 讀取先前儲存的進度
   useEffect(() => {
     const saved = localStorage.getItem("swipeIndex");
     if (saved) {
@@ -34,17 +34,17 @@ export default function SwipePage() {
     }
   }, []);
 
-  // 滑完清除（原樣）
+  // 滑完清除
   useEffect(() => {
     if (index >= rooms.length) {
       localStorage.removeItem("swipeIndex");
     }
   }, [index]);
 
-  // 檢查 avatar 和 symbol（原樣）
+  // 檢查 avatar 和 symbol
   useEffect(() => {
-    const a = localStorage.getItem("avatar");
-    const s = localStorage.getItem("symbol") as SymbolId | null;
+    const a = localStorage.getItem("pref_avatar");
+    const s = localStorage.getItem("pref_symbol") as SymbolId | null;
     if (!a || !s) {
       router.replace("/select");
       return;
@@ -56,15 +56,15 @@ export default function SwipePage() {
     }
   }, [router]);
 
-  // 目前要顯示的房間（原樣）
+  // 目前要顯示的房間
   const current = rooms[index];
 
-  // 進度顯示（原樣）
+  // 進度顯示
   const progressText = useMemo(() => {
     return `${Math.min(index + 1, rooms.length)} / ${rooms.length}`;
   }, [index]);
 
-  // 儲存配對成功（原樣）
+  // 儲存配對成功
   const pushMatched = (id: string) => {
     try {
       const raw = localStorage.getItem("matchedIds");
@@ -76,7 +76,7 @@ export default function SwipePage() {
     } catch { }
   };
 
-  // 遞增 index（原樣）
+  // 遞增 index
   const nextIndex = () => {
     setIndex((prev) => {
       const next = Math.min(prev + 1, rooms.length);
@@ -85,7 +85,7 @@ export default function SwipePage() {
     });
   };
 
-  // 拖曳開始/移動/結束（原樣）
+  // 拖曳開始/移動/結束
   const onStart = (x: number) => {
     startX.current = x;
   };
@@ -96,7 +96,7 @@ export default function SwipePage() {
     }
   };
 
-  // 判斷滑動方向並處理（原樣）
+  // 判斷滑動方向並處理
   const settle = (dir: "left" | "right") => {
     if (!current) return;
 
@@ -120,7 +120,7 @@ export default function SwipePage() {
     nextIndex();
   };
 
-  // 拖曳結束（原樣）
+  // 拖曳結束
   const onEnd = () => {
     if (!current) return;
     if (Math.abs(dx) > THRESHOLD) {
@@ -130,7 +130,7 @@ export default function SwipePage() {
     startX.current = null;
   };
 
-  // 已滑完（原樣）
+  // 已滑完
   if (!current) {
     return (
       <main className="mx-auto max-w-screen-sm min-h-dvh flex flex-col items-center justify-center text-center p-8">
@@ -155,7 +155,7 @@ export default function SwipePage() {
   // 浮水印透明度
   const badgeOpacity = Math.min(1, Math.abs(dx) / THRESHOLD);
 
-  // 兩顆圓鈕的「UI 高亮」判斷（僅 UI）
+  // 兩顆圓鈕的「UI 高亮」判斷
   const likeActive = dx > 6;
   const nopeActive = dx < -6;
   // 放大比例：距離門檻的比例（0→1）

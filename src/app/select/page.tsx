@@ -9,7 +9,7 @@ type SymbolId = "cream" | "minimal" | "scandi" | "industrial" | "muji";
 
 const IKEA_BLUE = "#0058A3";
 
-// 第一段：圓形頭像（依附圖）
+// 第一段：圓形頭像
 const AVATARS = [
   { id: "baby", label: "嬰兒" },
   { id: "woman", label: "女人" },
@@ -32,7 +32,7 @@ export default function SelectPage() {
   const [avatar, setAvatar] = useState<string | null>(null);
   const [symbol, setSymbol] = useState<SymbolId | null>(null);
 
-  // 回填（鍵名改得語意清楚一些）
+  // 回填
   useEffect(() => {
     const a = localStorage.getItem("pref_avatar");
     const s = localStorage.getItem("pref_symbol") as SymbolId | null;
@@ -64,7 +64,7 @@ export default function SelectPage() {
         <p className="text-[17px] font-semibold text-gray-700">請選擇你的面部</p>
       </section>
 
-      {/* 圓形選項 3×2（縮小版） */}
+      {/* 圓形選項 3×2 */}
       <section className="mt-4">
         <div className="mx-auto grid max-w-[300px] grid-cols-3 gap-x-5 gap-y-5">
           {AVATARS.map((item) => {

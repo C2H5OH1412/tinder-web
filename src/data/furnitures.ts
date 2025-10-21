@@ -3,7 +3,7 @@ export type FurnitureItem = {
     name: string;
     description: string;
     price: string;
-    image: string; // 圖片路徑 (放在 public/furniture/)
+    image: string; // 圖片路徑 ( public/furniture/)
     url: string;   // IKEA 官方商品網址
   };
   
