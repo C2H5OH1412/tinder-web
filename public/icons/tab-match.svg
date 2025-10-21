@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_圖層_2" data-name="圖層 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100.68 74.46">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #7e8592;
+        stroke-miterlimit: 10;
+        stroke-width: 4px;
+      }
+    </style>
+  </defs>
+  <g id="_選擇_初始_" data-name="選擇（初始）">
+    <g>
+      <circle class="cls-1" cx="9.89" cy="9.89" r="7.89"/>
+      <circle class="cls-1" cx="9.89" cy="37.23" r="7.89"/>
+      <circle class="cls-1" cx="9.89" cy="64.56" r="7.89"/>
+      <rect class="cls-1" x="30.28" y="2" width="68.4" height="15.79" rx="7.89" ry="7.89"/>
+      <rect class="cls-1" x="30.28" y="29.33" width="68.4" height="15.79" rx="7.89" ry="7.89"/>
+      <rect class="cls-1" x="30.28" y="56.67" width="68.4" height="15.79" rx="7.89" ry="7.89"/>
+    </g>
+  </g>
+</svg>

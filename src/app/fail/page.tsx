@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function FailPage() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function FailPage() {
       >
         繼續配對
       </button>
-      {/* 下方控制列：Share、Like、Match */}
+      {/* 底部 Tab（保留你的三欄；若要再換成你自製的 SVG 圖示，只需替換 src） */}
       <nav className="fixed bottom-0 left-0 w-full border-t bg-white/90 backdrop-blur z-40">
         <div className="mx-auto grid max-w-screen-sm grid-cols-3 text-center">
           <button
@@ -22,28 +23,34 @@ export default function FailPage() {
             onClick={async () => {
               try {
                 await navigator.share?.({ title: "IKEA Swipe Match", url: location.href });
-              } catch {}
+              } catch { }
             }}
           >
-            <span className="block text-xl" aria-hidden>📤</span>
-            Share
+            {/* 這裡可換成你的 tab icon：/tab/share.svg */}
+            <Image src="/icons/tab-match.svg" alt="Match" width={24} height={24} className="mx-auto mb-1" priority />
+            Match
           </button>
           <button
             className="p-3 text-sm font-medium"
             onClick={() => router.push("/swipe")}
           >
-            <span className="block text-xl" aria-hidden>❤️</span>
-            Like
+            {/* 這裡可換成你的 tab icon：/tab/likes.svg */}
+            <Image src="/icons/tab-like.svg" alt="Likes" width={24} height={24} className="mx-auto mb-1" priority />
+            Likes
           </button>
           <button
             className="p-3 text-sm font-medium"
-            onClick={() => router.push("/results")}
+            onClick={async () => {
+              try {
+                await navigator.share?.({ title: "IKEA Swipe Match", url: location.href });
+              } catch { }
+            }}
           >
-            <span className="block text-xl" aria-hidden>💖</span>
-            Match
+            {/* 這裡可換成你的 tab icon：/tab/share.svg */}
+            <Image src="/icons/tab-share.svg" alt="Share" width={24} height={24} className="mx-auto mb-1" priority />
+            Share
           </button>
         </div>
-        {/* iPhone 安全區留白 */}
         <div className="h-[env(safe-area-inset-bottom)]" />
       </nav>
     </main>
