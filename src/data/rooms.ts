@@ -19,7 +19,7 @@ export type Room = {
 type BaseRoom = Omit<Room, "price" | "location">;
 
 const baseRooms: BaseRoom[] = [
-  // 日式無印 (muji) — 5 組漂亮 / 醜
+  // 日式無印 (muji) — 4 組漂亮 / 醜
   { id: "muji1-pretty", image: "/rooms/muji1_pretty.png", title: "無印房間1", style: "muji", isUgly: false },
   { id: "muji1-ugly",   image: "/rooms/muji1_ugly.png",   title: "無印房間1（醜）", style: "muji", isUgly: true  },
   { id: "muji2-pretty", image: "/rooms/muji2_pretty.png", title: "無印房間2", style: "muji", isUgly: false },
@@ -28,10 +28,8 @@ const baseRooms: BaseRoom[] = [
   { id: "muji3-ugly",   image: "/rooms/muji3_ugly.png",   title: "無印房間3（醜）", style: "muji", isUgly: true  },
   { id: "muji4-pretty", image: "/rooms/muji4_pretty.png", title: "無印房間4", style: "muji", isUgly: false },
   { id: "muji4-ugly",   image: "/rooms/muji4_ugly.png",   title: "無印房間4（醜）", style: "muji", isUgly: true  },
-  { id: "muji5-pretty", image: "/rooms/muji5_pretty.png", title: "無印房間5", style: "muji", isUgly: false },
-  { id: "muji5-ugly",   image: "/rooms/muji5_ugly.png",   title: "無印房間5（醜）", style: "muji", isUgly: true  },
 
-  // 奶油雲朵 (cream) — 5 組漂亮 / 醜
+  // 奶油雲朵 (cream) — 4 組漂亮 / 醜
   { id: "cream1-pretty", image: "/rooms/cream1_pretty.png", title: "奶油房間1", style: "cream", isUgly: false },
   { id: "cream1-ugly",   image: "/rooms/cream1_ugly.png",   title: "奶油房間1（醜）", style: "cream", isUgly: true  },
   { id: "cream2-pretty", image: "/rooms/cream2_pretty.png", title: "奶油房間2", style: "cream", isUgly: false },
@@ -40,10 +38,8 @@ const baseRooms: BaseRoom[] = [
   { id: "cream3-ugly",   image: "/rooms/cream3_ugly.png",   title: "奶油房間3（醜）", style: "cream", isUgly: true  },
   { id: "cream4-pretty", image: "/rooms/cream4_pretty.png", title: "奶油房間4", style: "cream", isUgly: false },
   { id: "cream4-ugly",   image: "/rooms/cream4_ugly.png",   title: "奶油房間4（醜）", style: "cream", isUgly: true  },
-  { id: "cream5-pretty", image: "/rooms/cream5_pretty.png", title: "奶油房間5", style: "cream", isUgly: false },
-  { id: "cream5-ugly",   image: "/rooms/cream5_ugly.png",   title: "奶油房間5（醜）", style: "cream", isUgly: true  },
 
-  // 工業 (industrial) — 5 組
+  // 工業 (industrial) — 4 組
   { id: "industrial1-pretty", image: "/rooms/industrial1_pretty.png", title: "工業房間1", style: "industrial", isUgly: false },
   { id: "industrial1-ugly",   image: "/rooms/industrial1_ugly.png",   title: "工業房間1（醜）", style: "industrial", isUgly: true  },
   { id: "industrial2-pretty", image: "/rooms/industrial2_pretty.png", title: "工業房間2", style: "industrial", isUgly: false },
@@ -52,20 +48,16 @@ const baseRooms: BaseRoom[] = [
   { id: "industrial3-ugly",   image: "/rooms/industrial3_ugly.png",   title: "工業房間3（醜）", style: "industrial", isUgly: true  },
   { id: "industrial4-pretty", image: "/rooms/industrial4_pretty.png", title: "工業房間4", style: "industrial", isUgly: false },
   { id: "industrial4-ugly",   image: "/rooms/industrial4_ugly.png",   title: "工業房間4（醜）", style: "industrial", isUgly: true  },
-  { id: "industrial5-pretty", image: "/rooms/industrial5_pretty.png", title: "工業房間5", style: "industrial", isUgly: false },
-  { id: "industrial5-ugly",   image: "/rooms/industrial5_ugly.png",   title: "工業房間5（醜）", style: "industrial", isUgly: true  },
 
-  // 極簡 (minimal) — 5 組
-  { id: "minimal1-pretty", image: "/rooms/minimal1_pretty.jpg", title: "極簡房間1", style: "minimal", isUgly: false },
-  { id: "minimal1-ugly",   image: "/rooms/minimal1_ugly.jpg",   title: "極簡房間1（醜）", style: "minimal", isUgly: true  },
-  { id: "minimal2-pretty", image: "/rooms/minimal2_pretty.jpg", title: "極簡房間2", style: "minimal", isUgly: false },
-  { id: "minimal2-ugly",   image: "/rooms/minimal2_ugly.jpg",   title: "極簡房間2（醜）", style: "minimal", isUgly: true  },
-  { id: "minimal3-pretty", image: "/rooms/minimal3_pretty.jpg", title: "極簡房間3", style: "minimal", isUgly: false },
-  { id: "minimal3-ugly",   image: "/rooms/minimal3_ugly.jpg",   title: "極簡房間3（醜）", style: "minimal", isUgly: true  },
-  { id: "minimal4-pretty", image: "/rooms/minimal4_pretty.jpg", title: "極簡房間4", style: "minimal", isUgly: false },
-  { id: "minimal4-ugly",   image: "/rooms/minimal4_ugly.jpg",   title: "極簡房間4（醜）", style: "minimal", isUgly: true  },
-  { id: "minimal5-pretty", image: "/rooms/minimal5_pretty.jpg", title: "極簡房間5", style: "minimal", isUgly: false },
-  { id: "minimal5-ugly",   image: "/rooms/minimal5_ugly.jpg",   title: "極簡房間5（醜）", style: "minimal", isUgly: true  },
+  // 極簡 (minimal) — 4 組
+  { id: "minimal1-pretty", image: "/rooms/minimal1_pretty.png", title: "極簡房間1", style: "minimal", isUgly: false },
+  { id: "minimal1-ugly",   image: "/rooms/minimal1_ugly.png",   title: "極簡房間1（醜）", style: "minimal", isUgly: true  },
+  { id: "minimal2-pretty", image: "/rooms/minimal2_pretty.png", title: "極簡房間2", style: "minimal", isUgly: false },
+  { id: "minimal2-ugly",   image: "/rooms/minimal2_ugly.png",   title: "極簡房間2（醜）", style: "minimal", isUgly: true  },
+  { id: "minimal3-pretty", image: "/rooms/minimal3_pretty.png", title: "極簡房間3", style: "minimal", isUgly: false },
+  { id: "minimal3-ugly",   image: "/rooms/minimal3_ugly.png",   title: "極簡房間3（醜）", style: "minimal", isUgly: true  },
+  { id: "minimal4-pretty", image: "/rooms/minimal4_pretty.png", title: "極簡房間4", style: "minimal", isUgly: false },
+  { id: "minimal4-ugly",   image: "/rooms/minimal4_ugly.png",   title: "極簡房間4（醜）", style: "minimal", isUgly: true  },
 ];
 
 /**

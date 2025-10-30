@@ -1,41 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const IKEA_BLUE = "#0058A3";
 
-const AVATARS = [
-  { id: "boy", label: "男孩", src: "/avatars/boy.png" },
-  { id: "girl", label: "女孩", src: "/avatars/girl.png" },
-  { id: "baby", label: "嬰兒", src: "/avatars/baby.png" },
-  { id: "dog", label: "狗狗", src: "/avatars/dog.png" },
-  { id: "cat", label: "貓貓", src: "/avatars/cat.png" },
-  { id: "hamster", label: "倉鼠", src: "/avatars/hamster.png" },
-] as const;
-
-export default function SelectPage() {
+export default function ReadyPage() {
   const router = useRouter();
-  const [avatar, setAvatar] = useState<string | null>(null);
 
-  // 回填
-  useEffect(() => {
-    const a = localStorage.getItem("pref_avatar");
-    if (a) setAvatar(a);
-  }, []);
-
-  const ready = avatar != null;
-
-  const goNext = () => {
-    if (!ready) return;
-    // 儲存頭貼
-    localStorage.setItem("pref_avatar", String(avatar));
-    // 為了相容既有 swipe 的檢查，若沒有 pref_symbol 就給預設值
-    if (!localStorage.getItem("pref_symbol")) {
-      localStorage.setItem("pref_symbol", "muji");
-    }
-    router.push("/ready");
+  const start = () => {
+    // 這裡不改動其他邏輯，直接開始 swipe
+    router.push("/swipe");
   };
 
   return (
@@ -45,47 +20,25 @@ export default function SelectPage() {
         <Image src="/ikea.svg" alt="IKEA" width={64} height={26} priority />
       </a>
 
-      {/* 標題：請選擇你的面部 */}
-      <section className="mt-10 text-center">
-        <p className="text-[17px] font-semibold text-gray-700">請選擇你的面部</p>
+      {/* 置中文字區 */}
+      <section className="flex min-h-[60vh] flex-col items-center justify-center text-center">
+        <h1 className="text-3xl font-extrabold tracking-tight text-black">
+          快來尋找你的夢中情房
+        </h1>
+        <p className="mt-8 whitespace-pre-line text-xl font-extrabold text-black/90">
+          接下來請{"\n"}「右滑你的type」
+        </p>
       </section>
 
-      {/* 頭像選擇（圖片圓形） */}
-      <section className="mt-4">
-        <div className="mx-auto grid max-w-[320px] grid-cols-3 gap-5">
-          {AVATARS.map((item) => {
-            const active = avatar === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setAvatar(item.id)}
-                aria-pressed={active}
-                className={[
-                  "relative h-20 w-20 overflow-hidden rounded-full transition-all duration-200",
-                  active
-                    ? "ring-4 ring-yellow-400 scale-105 shadow-md"
-                    : "ring-2 ring-gray-300 hover:scale-105",
-                ].join(" ")}
-                aria-label={item.label}
-              >
-                <Image src={item.src} alt={item.label} fill className="object-cover" sizes="80px" />
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* GO 按鈕（樣式同首頁） */}
+      {/* GO 按鈕（與首頁/Select 一致） */}
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40">
         <div className="pointer-events-auto mx-auto mb-[env(safe-area-inset-bottom)] max-w-screen-sm px-4 pb-5">
           <button
-            disabled={!ready}
-            onClick={goNext}
+            onClick={start}
             className={[
               "group flex h-12 w-full items-center rounded-full bg-white shadow-lg",
               "transition-[background,transform,box-shadow] duration-200",
               "hover:-translate-y-0.5 hover:shadow-xl",
-              ready ? "opacity-100" : "opacity-60 pointer-events-none",
             ].join(" ")}
             aria-label="GO"
           >

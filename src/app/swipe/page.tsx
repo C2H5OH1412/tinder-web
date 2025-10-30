@@ -1,70 +1,68 @@
+// app/swipe/page.tsx
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { rooms } from "@/data/rooms";
 
-// 定義四種象徵風格的型別
 export type SymbolId = "muji" | "cream" | "industrial" | "minimal";
 
-const THRESHOLD = 80;
+type Counts = Record<SymbolId, number>;
+const ZERO_COUNTS: Counts = { muji: 0, cream: 0, industrial: 0, minimal: 0 };
 
-// 色票
+const THRESHOLD = 80;
 const COLOR_BLUE = "#0057AD";
 const COLOR_YELLOW = "#FBDA0C";
-const COLOR_GRAY = "#7e8592";
 
 export default function SwipePage() {
   const router = useRouter();
 
-  // 狀態
-  const [selectedSymbol, setSelectedSymbol] = useState<SymbolId | null>(null);
+  // ---- state / refs（所有 hooks 一律在最上面） ----
   const [index, setIndex] = useState(0);
   const [dx, setDx] = useState(0);
   const startX = useRef<number | null>(null);
 
-  // 讀取先前儲存的進度
+  // 初始化：讀取進度與統計
   useEffect(() => {
     const saved = localStorage.getItem("swipeIndex");
     if (saved) {
       const i = parseInt(saved, 10);
       if (!isNaN(i)) setIndex(i);
     }
+    if (!localStorage.getItem("likedCounts")) {
+      localStorage.setItem("likedCounts", JSON.stringify(ZERO_COUNTS));
+    }
   }, []);
 
-  // 滑完清除
+  // 滑完全部 → 決定結果
   useEffect(() => {
     if (index >= rooms.length) {
       localStorage.removeItem("swipeIndex");
+      finalizeMatch();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
-  // 檢查 avatar 和 symbol
+  // 畫面不允許母體滾動（避免拖曳帶動頁面）
   useEffect(() => {
-    const a = localStorage.getItem("pref_avatar");
-    const s = localStorage.getItem("pref_symbol") as SymbolId | null;
-    if (!a || !s) {
-      router.replace("/select");
-      return;
-    }
-    if (["muji", "cream", "industrial", "minimal"].includes(s)) {
-      setSelectedSymbol(s);
-    } else {
-      router.replace("/select");
-    }
-  }, [router]);
+    const prev = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.documentElement.style.overflow = prev;
+    };
+  }, []);
 
-  // 目前要顯示的房間
-  const current = rooms[index];
+  // ---- helpers ----
+  const addLikeToStyle = (style: SymbolId) => {
+    try {
+      const raw = localStorage.getItem("likedCounts");
+      const counts: Counts = raw ? JSON.parse(raw) : { ...ZERO_COUNTS };
+      counts[style] = (counts[style] ?? 0) + 1;
+      localStorage.setItem("likedCounts", JSON.stringify(counts));
+    } catch {}
+  };
 
-  // 進度顯示
-  const progressText = useMemo(() => {
-    return `${Math.min(index + 1, rooms.length)} / ${rooms.length}`;
-  }, [index]);
-
-  // 儲存配對成功
   const pushMatched = (id: string) => {
     try {
       const raw = localStorage.getItem("matchedIds");
@@ -73,10 +71,9 @@ export default function SwipePage() {
         arr.push(id);
         localStorage.setItem("matchedIds", JSON.stringify(arr));
       }
-    } catch { }
+    } catch {}
   };
 
-  // 遞增 index
   const nextIndex = () => {
     setIndex((prev) => {
       const next = Math.min(prev + 1, rooms.length);
@@ -85,96 +82,122 @@ export default function SwipePage() {
     });
   };
 
-  // 拖曳開始/移動/結束
-  const onStart = (x: number) => {
-    startX.current = x;
-  };
-
-  const onMove = (x: number) => {
-    if (startX.current !== null) {
-      setDx(x - startX.current);
-    }
-  };
-
-  // 判斷滑動方向並處理
   const settle = (dir: "left" | "right") => {
+    const current = rooms[index];
     if (!current) return;
-
     if (dir === "right") {
-      if (current.isUgly) {
-        nextIndex();
-        router.push("/fail");
-        return;
-      }
-      if (current.style === selectedSymbol) {
-        pushMatched(current.id);
-        nextIndex();
-        router.push("/match");
-        return;
-      }
-      nextIndex();
-      return;
+      addLikeToStyle(current.style as SymbolId);
+      pushMatched(current.id);
     }
-
-    // 左滑
     nextIndex();
   };
 
-  // 拖曳結束
-  const onEnd = () => {
-    if (!current) return;
-    if (Math.abs(dx) > THRESHOLD) {
-      settle(dx > 0 ? "right" : "left");
+  const finalizeMatch = () => {
+    try {
+      const counts: Counts = JSON.parse(
+        localStorage.getItem("likedCounts") || JSON.stringify(ZERO_COUNTS)
+      );
+
+      // 計算總右滑數
+      const totalLikes = Object.values(counts).reduce((a, b) => a + b, 0);
+
+      // ✅ 全左滑 → 高嶺之花
+      if (totalLikes === 0) {
+        localStorage.setItem("finalOutcome", "coldBeauty");
+        localStorage.removeItem("finalStyle");
+        router.replace("/results");
+        return;
+      }
+
+      // ✅ 三種以上同分 → 海王
+      const distinctLiked = Object.values(counts).filter((v) => v > 0).length;
+      if (distinctLiked >= 3) {
+        localStorage.setItem("finalOutcome", "seaKing");
+        localStorage.removeItem("finalStyle");
+        router.replace("/results");
+        return;
+      }
+
+      // ✅ 計算最高票風格
+      const entries = Object.entries(counts) as [SymbolId, number][];
+      const max = Math.max(...entries.map(([, v]) => v));
+      const top = entries.filter(([, v]) => v === max).map(([k]) => k);
+
+      let winner: SymbolId;
+      if (top.length === 2) {
+        // ✅ 平手 → 隨機取 1
+        winner = top[Math.floor(Math.random() * 2)];
+      } else {
+        // ✅ 單一最高 → 成功配對
+        winner = top[0];
+      }
+
+      // ✅ 儲存結果到 localStorage
+      localStorage.setItem("finalOutcome", "style");
+      localStorage.setItem("finalStyle", winner);
+
+      router.replace("/results");
+    } catch {
+      router.replace("/");
     }
+  };
+
+
+  // ---- pointer handlers ----
+  const onStart = (x: number) => (startX.current = x);
+  const onMove = (x: number) => {
+    if (startX.current !== null) setDx(x - startX.current);
+  };
+  const onEnd = () => {
+    const abs = Math.abs(dx);
+    if (abs > THRESHOLD) settle(dx > 0 ? "right" : "left");
     setDx(0);
     startX.current = null;
   };
 
-  // 已滑完
+  // ---- derive (不用 hooks) ----
+  const current = rooms[index];
+  const progressText = `${Math.min(index + 1, rooms.length)} / ${rooms.length}`;
+
+  // 讓卡片位移與旋轉
+  const rotate = Math.max(-12, Math.min(12, dx / 10));
+  const cardStyle: React.CSSProperties = {
+    transform: `translateX(${dx}px) rotate(${rotate}deg)`,
+    transition: startX.current === null ? "transform 0.2s ease" : undefined,
+  };
+
+  const badgeOpacity = Math.min(1, Math.abs(dx) / THRESHOLD);
+
+  // SVG 按鈕縮放（原地縮放、不位移）
+  const dragRatio = Math.max(-1, Math.min(1, dx / THRESHOLD)); // -1..1
+  const neutral = Math.abs(dx) <= 6;
+  const goingRight = dragRatio > 0.06;
+  const goingLeft = dragRatio < -0.06;
+  const mag = Math.min(Math.abs(dx) / THRESHOLD, 1);
+  const SIZE = 88;
+  const SCALE_PLUS = 0.35;
+
+  // ---- early return（此時沒有 hooks 在它後面，安全）----
   if (!current) {
     return (
       <main className="mx-auto max-w-screen-sm min-h-dvh flex flex-col items-center justify-center text-center p-8">
-        <h2 className="text-2xl font-semibold mb-2">配對完成！</h2>
-        <p className="text-gray-600 mb-6">沒有更多房間了。</p>
-        <div className="flex gap-3">
-          <Link href="/results" className="rounded-2xl bg-yellow-300 px-5 py-3 font-semibold hover:brightness-95">
-            查看我的配對
-          </Link>
-          <Link href="/" className="rounded-2xl border px-5 py-3">回首頁</Link>
-        </div>
+        <h2 className="text-xl font-semibold mb-2">計算你的命定風格中…</h2>
+        <p className="text-gray-500">請稍候</p>
       </main>
     );
   }
 
-  const rotate = Math.max(-12, Math.min(12, dx / 10));
-  const cardStyle = {
-    transform: `translateX(${dx}px) rotate(${rotate}deg)`,
-    transition: startX.current === null ? "transform 0.2s ease" : undefined,
-  } as const;
-
-  // 浮水印透明度
-  const badgeOpacity = Math.min(1, Math.abs(dx) / THRESHOLD);
-
-  // 兩顆圓鈕的「UI 高亮」判斷
-  const likeActive = dx > 6;
-  const nopeActive = dx < -6;
-  // 放大比例：距離門檻的比例（0→1）
-const mag = Math.min(Math.abs(dx) / THRESHOLD, 1);
-// 左滑放大左鍵、右滑放大右鍵；最大 +25%
-const scaleNope = 1 + (dx < 0 ? 0.25 * mag : 0);
-const scaleLike = 1 + (dx > 0 ? 0.25 * mag : 0);
-
   return (
-    <main className="relative mx-auto min-h-dvh max-w-screen-sm px-4 pt-16 pb-28">
-      {/* 左上 Logo（原樣） */}
+    <main className="relative mx-auto h-dvh max-w-screen-sm overflow-hidden px-4 pt-16 pb-28">
+      {/* 左上 Logo */}
       <a href="/" className="absolute left-4 top-3 inline-flex items-center" aria-label="首頁">
         <Image src="/ikea.svg" alt="IKEA" width={76} height={30} priority />
       </a>
 
-      {/* 卡片區（加上浮水印與底部資訊條的 UI） */}
+      {/* 卡片區（touch-none 可避免拖曳時的瀏覽器手勢） */}
       <section className="pt-6 pb-24">
         <div
-          className="mx-auto w-full max-w-sm select-none touch-pan-y"
+          className="relative mx-auto w-full max-w-sm select-none touch-none"
           onTouchStart={(e) => onStart(e.touches[0].clientX)}
           onTouchMove={(e) => onMove(e.touches[0].clientX)}
           onTouchEnd={onEnd}
@@ -183,130 +206,140 @@ const scaleLike = 1 + (dx > 0 ? 0.25 * mag : 0);
           onMouseUp={onEnd}
           onMouseLeave={() => startX.current !== null && onEnd()}
         >
+          {/* 卡片 */}
           <div
-            className="relative aspect-[3/4] w-full overflow-hidden rounded-[18px] shadow-[0_8px_24px_rgba(0,0,0,0.2)] bg-white"
+            className="relative aspect-[3/4] w-full overflow-hidden rounded-[18px] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.2)]"
             style={cardStyle}
           >
-            <Image src={current.image} alt={current.title} fill className="object-cover" priority />
+            <Image
+              src={current.image}
+              alt={current.title}
+              fill
+              priority
+              className="object-cover pointer-events-none select-none"
+            />
 
-            {/* 下半白色資訊條（純 UI，不動資料/判斷） */}
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 rounded-t-[18px] bg-white/96 p-3">
-              {/* 價格 */}
-              <p className="text-[20px] font-semibold leading-tight" style={{ color: "#0057AD" }}>
+            {/* 底部資訊 */}
+            <div className="absolute inset-x-0 bottom-0 rounded-t-[18px] bg-white/95 p-3">
+              <p className="text-[20px] font-semibold leading-tight" style={{ color: COLOR_BLUE }}>
                 {current.price?.toLocaleString("en-US", { maximumFractionDigits: 0 }) ?? "10,000"} TWD / Month
               </p>
-
-              {/* 地點：把 { city, district } 轉成文字再渲染 */}
               {current.location && (
                 <span
                   className="mt-2 inline-block rounded-sm px-2 py-0.5 text-[11px] font-semibold"
-                  style={{ background: "#FBDA0C", color: "#1a1a1a" }}
+                  style={{ background: COLOR_YELLOW, color: "#1a1a1a" }}
                 >
-                  {/* 大寫地名 */}
-                  {/* {`${current.location.city}, ${current.location.district}`} */}
                   {current.location.city.toUpperCase()}, {current.location.district.toUpperCase()}
                 </span>
               )}
             </div>
 
-
-            {/* LIKE / NOPE 浮水印 */}
+            {/* LIKE / NOPE 漂浮貼紙（卡片角落） */}
             {dx > 0 && (
-              <div
-                className="pointer-events-none absolute left-6 top-6"
-                style={{ transform: "rotate(-10deg)", opacity: badgeOpacity }}
-              >
+              <div className="absolute left-6 top-6" style={{ transform: "rotate(-10deg)", opacity: badgeOpacity }}>
                 <Image src="/like.svg" alt="LIKE" width={200} height={100} />
               </div>
             )}
             {dx < 0 && (
-              <div
-                className="pointer-events-none absolute right-6 top-6"
-                style={{ transform: "rotate(10deg)", opacity: badgeOpacity }}
-              >
+              <div className="absolute right-6 top-6" style={{ transform: "rotate(10deg)", opacity: badgeOpacity }}>
                 <Image src="/nope.svg" alt="NOPE" width={200} height={100} />
               </div>
             )}
           </div>
+
+          {/* 浮動 SVG 按鈕（沒有白色圓框，原地縮放） */}
+          <div
+            className="pointer-events-none absolute left-1/2 z-30 -translate-x-1/2 flex items-center gap-16"
+            style={{ bottom: "-4.5rem" }} // 想更靠下可再調
+          >
+            {(() => {
+              const btnBase =
+                "pointer-events-auto p-0 m-0 border-0 bg-transparent outline-none focus:outline-none";
+
+              const iconStyle = (active: boolean): React.CSSProperties => ({
+                width: "100%",
+                height: "100%",
+                display: "block",
+                userSelect: "none",
+                pointerEvents: "none",
+                transform: `scale(${active ? 1 + SCALE_PLUS * mag : 1})`,
+                transformOrigin: "center",
+                transition: "transform 120ms ease",
+              });
+
+              const Btn = ({
+                type,
+                active,
+                hidden,
+                onClick,
+              }: {
+                type: "like" | "nope";
+                active: boolean;
+                hidden: boolean;
+                onClick: () => void;
+              }) => {
+                const src =
+                  type === "like"
+                    ? active
+                      ? "/icons/blueheart.svg"
+                      : "/icons/heart.svg"
+                    : active
+                    ? "/icons/bluecross.svg"
+                    : "/icons/cross.svg";
+
+                return (
+                  <button
+                    aria-label={type === "like" ? "Like" : "Nope"}
+                    className={btnBase}
+                    style={{
+                      width: SIZE,
+                      height: SIZE,
+                      opacity: hidden ? 0 : 1,
+                      visibility: hidden ? "hidden" : "visible",
+                    }}
+                    onClick={onClick}
+                  >
+                    <img src={src} alt="" aria-hidden style={iconStyle(active)} />
+                  </button>
+                );
+              };
+
+              return (
+                <>
+                  {/* 左滑時只顯示叉叉；右滑時只顯示愛心；靜止兩顆都在 */}
+                  <Btn
+                    type="nope"
+                    active={goingLeft}
+                    hidden={!neutral && !goingLeft}
+                    onClick={() => {
+                      setDx(-(THRESHOLD + 1));
+                      setTimeout(onEnd, 0);
+                    }}
+                  />
+                  <Btn
+                    type="like"
+                    active={goingRight}
+                    hidden={!neutral && !goingRight}
+                    onClick={() => {
+                      setDx(THRESHOLD + 1);
+                      setTimeout(onEnd, 0);
+                    }}
+                  />
+                </>
+              );
+            })()}
+          </div>
         </div>
 
         {/* 進度 */}
-        <p className="mt-3 text-center text-sm text-gray-500">{progressText}</p>
+        <p className="mt-8 text-center text-sm text-gray-500">{progressText}</p>
       </section>
 
-      {/* 浮動圓形操作鈕（提高層級到 z-50） */}
-<div className="pointer-events-none absolute inset-x-0 bottom-[94px] z-50">
-  <div className="pointer-events-auto mx-auto flex max-w-screen-sm items-center justify-center gap-6">
-    {/* NOPE */}
-    <button
-      aria-label="Nope"
-      onClick={() => {
-        setDx(-(THRESHOLD + 1));
-        setTimeout(onEnd, 0);
-      }}
-      className={[
-        "h-14 w-14 rounded-full shadow-md transition-transform",
-        dx < -6 ? "" : "hover:-translate-y-0.5",
-      ].join(" ")}
-      style={{
-        background: "transparent",
-        transform: `scale(${scaleNope})`,
-        transition: "transform 120ms ease", // 平滑放大
-      }}
-    >
-      <img
-        src={dx < -6 ? "/icons/bluecross.svg" : "/icons/cross.svg"}
-        alt="Nope"
-        width={56}
-        height={56}
-        className="mx-auto block"
-      />
-    </button>
-
-    {/* LIKE */}
-    <button
-      aria-label="Like"
-      onClick={() => {
-        setDx(THRESHOLD + 1);
-        setTimeout(onEnd, 0);
-      }}
-      className={[
-        "h-14 w-14 rounded-full shadow-md transition-transform",
-        dx > 6 ? "" : "hover:-translate-y-0.5",
-      ].join(" ")}
-      style={{
-        background: "transparent",
-        transform: `scale(${scaleLike})`,
-        transition: "transform 120ms ease",
-      }}
-    >
-      <img
-        src={dx > 6 ? "/icons/blueheart.svg" : "/icons/heart.svg"}
-        alt="Like"
-        width={56}
-        height={56}
-        className="mx-auto block"
-      />
-    </button>
-  </div>
-</div>
-
-
-
-
-      {/* 底部 Tab（保留你的三欄；若要再換成你自製的 SVG 圖示，只需替換 src） */}
-      <nav className="fixed bottom-0 left-0 w-full border-t bg-white/90 backdrop-blur z-40">
+      {/* 底部 Tab（fixed，不隨內容滾動） */}
+      <nav className="fixed bottom-0 left-0 z-40 w-full border-t bg-white/90 backdrop-blur">
         <div className="mx-auto grid max-w-screen-sm grid-cols-3 text-center">
-          <button
-            className="p-3 text-sm font-medium"
-            onClick={async () => {
-              try {
-                await navigator.share?.({ title: "IKEA Swipe Match", url: location.href });
-              } catch { }
-            }}
-          >
-            {/* 這裡可換成你的 tab icon：/tab/share.svg */}
-            <Image src="/icons/tab-match.svg" alt="Match" width={24} height={24} className="mx-auto mb-1" priority />
+          <button className="p-3 text-sm font-medium">
+            <Image src="/icons/tab-match.svg" alt="Match" width={24} height={24} className="mx-auto mb-1" />
             Match
           </button>
           <button
@@ -316,8 +349,7 @@ const scaleLike = 1 + (dx > 0 ? 0.25 * mag : 0);
               setTimeout(onEnd, 0);
             }}
           >
-            {/* 這裡可換成你的 tab icon：/tab/likes.svg */}
-            <Image src="/icons/tab-like.svg" alt="Likes" width={24} height={24} className="mx-auto mb-1" priority />
+            <Image src="/icons/tab-like.svg" alt="Likes" width={24} height={24} className="mx-auto mb-1" />
             Likes
           </button>
           <button
@@ -325,11 +357,10 @@ const scaleLike = 1 + (dx > 0 ? 0.25 * mag : 0);
             onClick={async () => {
               try {
                 await navigator.share?.({ title: "IKEA Swipe Match", url: location.href });
-              } catch { }
+              } catch {}
             }}
           >
-            {/* 這裡可換成你的 tab icon：/tab/share.svg */}
-            <Image src="/icons/tab-share.svg" alt="Share" width={24} height={24} className="mx-auto mb-1" priority />
+            <Image src="/icons/tab-share.svg" alt="Share" width={24} height={24} className="mx-auto mb-1" />
             Share
           </button>
         </div>
