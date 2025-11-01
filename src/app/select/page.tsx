@@ -45,9 +45,9 @@ export default function SelectPage() {
         <Image src="/ikea.svg" alt="IKEA" width={64} height={26} priority />
       </a>
 
-      {/* 標題：請選擇你的面部 */}
+      {/* 標題：請選擇你的頭貼 */}
       <section className="mt-10 text-center">
-        <p className="text-[17px] font-semibold text-gray-700">請選擇你的面部</p>
+        <p className="text-[17px] font-semibold text-gray-700">請選擇你的頭貼</p>
       </section>
 
       {/* 頭像選擇（圖片圓形） */}
@@ -75,7 +75,7 @@ export default function SelectPage() {
         </div>
       </section>
 
-      {/* GO 按鈕（樣式同首頁） */}
+      {/* GO 按鈕 */}
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40">
         <div className="pointer-events-auto mx-auto mb-[env(safe-area-inset-bottom)] max-w-screen-sm px-4 pb-5">
           <button

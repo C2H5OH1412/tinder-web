@@ -103,50 +103,47 @@ export default function SwipePage() {
 
   const finalizeMatch = () => {
     try {
-      const counts: Counts = JSON.parse(
-        localStorage.getItem("likedCounts") || JSON.stringify(ZERO_COUNTS)
-      );
-
+      const counts: Counts = JSON.parse(localStorage.getItem("likedCounts") || JSON.stringify(ZERO_COUNTS));
       console.log("[FINALIZE] 統計結果:", counts);
-
+  
       const totalLikes = Object.values(counts).reduce((a, b) => a + b, 0);
-
-      // ❄️ 全左滑 → 高嶺之花
+  
       if (totalLikes === 0) {
         localStorage.setItem("finalOutcome", "coldBeauty");
         localStorage.removeItem("finalStyle");
-        router.replace("/match"); // ✅ 改成導向 match
+        router.replace("/match");
         return;
       }
-
-      // 🌊 三種以上同分 → 海王
-      const distinctLiked = Object.values(counts).filter((v) => v > 0).length;
-      if (distinctLiked >= 3) {
-        console.log("🏖 海王模式觸發（三種以上同分）");
-        localStorage.setItem("finalOutcome", "seaKing");
-        localStorage.removeItem("finalStyle");
-        router.replace("/match"); // ✅ 改成導向 match
-        return;
-      }
-
-      // 🏆 計算最高票風格
+  
       const entries = Object.entries(counts) as [SymbolId, number][];
       const max = Math.max(...entries.map(([, v]) => v));
-      const top = entries.filter(([, v]) => v === max).map(([k]) => k);
-      const winner = top.length === 2 ? top[Math.floor(Math.random() * 2)] : top[0];
-
-      console.log("💛 配對成功風格:", winner);
-
-      // 儲存結果
+      const topStyles = entries.filter(([, v]) => v === max && v > 0).map(([k]) => k);
+  
+      // 🌊 海王條件（嚴一些）：至少三個風格並列最高票
+      if (topStyles.length >= 3) {
+        console.log("🏖 海王模式觸發（≥3 風格同票）", topStyles);
+        localStorage.setItem("finalOutcome", "seaKing");
+        localStorage.removeItem("finalStyle");
+        router.replace("/match");
+        return;
+      }
+  
+      let winner: SymbolId;
+      if (topStyles.length === 2) {
+        winner = topStyles[Math.floor(Math.random() * 2)];
+      } else {
+        winner = topStyles[0];
+      }
+  
       localStorage.setItem("finalOutcome", "style");
       localStorage.setItem("finalStyle", winner);
-
-      router.replace("/match"); // ✅ 改成導向 match
+      router.replace("/match");
     } catch (err) {
       console.error("❌ finalizeMatch 發生錯誤:", err);
       router.replace("/");
     }
   };
+  
 
 
   // ---- pointer handlers ----
