@@ -22,11 +22,14 @@ export default function ReadyPage() {
 
       {/* 置中文字區 */}
       <section className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-        <h1 className="text-3xl font-extrabold tracking-tight text-black">
+        <h1 className="text-3xl font-extrabold tracking-tight text-[#0057AD]">
           快來尋找你的夢中情房
         </h1>
-        <p className="mt-8 whitespace-pre-line text-xl font-extrabold text-black/90">
-          接下來請{"\n"}「右滑你的type」
+        <p className="mt-8 whitespace-pre-line text-xl font-extrabold text-[#0057AD]">
+          接下來請{"\n"}
+        </p>
+        <p className="mt-2 whitespace-pre-line text-2xl font-extrabold text-[#0057AD]">
+          「右滑你的type」
         </p>
       </section>
 

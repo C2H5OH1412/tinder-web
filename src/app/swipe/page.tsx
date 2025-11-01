@@ -193,6 +193,7 @@ export default function SwipePage() {
 
       {/* 卡片區 */}
       <section className="pt-6 pb-24">
+        <p className="mt-2 mb-8 text-center text-2xl text-gray-500">{progressText}</p>
         <div
           className="relative mx-auto w-full max-w-sm select-none touch-none"
           onTouchStart={(e) => onStart(e.touches[0].clientX)}
@@ -323,7 +324,7 @@ export default function SwipePage() {
             })()}
           </div>
         </div>
-        <p className="mt-8 text-center text-sm text-gray-500">{progressText}</p>
+        
       </section>
 
       {/* 固定底部 tab */}

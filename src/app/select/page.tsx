@@ -47,11 +47,11 @@ export default function SelectPage() {
 
       {/* 標題：請選擇你的頭貼 */}
       <section className="mt-10 text-center">
-        <p className="text-[17px] font-semibold text-gray-700">請選擇你的頭貼</p>
+        <p className="text-[28px] font-semibold text-[#0057AD]">請選擇你的頭貼</p>
       </section>
 
       {/* 頭像選擇（圖片圓形） */}
-      <section className="mt-4">
+      <section className="mt-10">
         <div className="mx-auto grid max-w-[320px] grid-cols-3 gap-5">
           {AVATARS.map((item) => {
             const active = avatar === item.id;
@@ -61,7 +61,7 @@ export default function SelectPage() {
                 onClick={() => setAvatar(item.id)}
                 aria-pressed={active}
                 className={[
-                  "relative h-20 w-20 overflow-hidden rounded-full transition-all duration-200",
+                  "relative h-25 w-25 overflow-hidden rounded-full transition-all duration-200",
                   active
                     ? "ring-4 ring-yellow-400 scale-105 shadow-md"
                     : "ring-2 ring-gray-300 hover:scale-105",
