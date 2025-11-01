@@ -165,7 +165,7 @@ export default function ResultsPage() {
         </section>
 
         <section className="mt-5 px-1">
-          <p className="text-xl font-extrabold tracking-wide">
+          <p className="text-xl text-black font-extrabold tracking-wide">
             距離你追到 <span className="mx-1 text-[#0057AD]">{STYLE_ALIAS[currentStyle]}</span> 還差…
           </p>
         </section>
