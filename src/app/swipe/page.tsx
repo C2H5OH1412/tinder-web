@@ -185,7 +185,7 @@ export default function SwipePage() {
   const SCALE_PLUS = 0.35;
 
   return (
-    <main className="relative mx-auto h-dvh max-w-screen-sm overflow-hidden px-4 pt-16 pb-28">
+    <main className="relative mx-auto h-dvh max-w-screen-sm overflow-hidden px-4 pt-6 pb-28">
       {/* 左上 Logo */}
       <a href="/" className="absolute left-4 top-3 inline-flex items-center" aria-label="首頁">
         <Image src="/ikea.svg" alt="IKEA" width={76} height={30} priority />
@@ -193,7 +193,7 @@ export default function SwipePage() {
 
       {/* 卡片區 */}
       <section className="pt-2 pb-24">
-        <p className="mt-0 mb-7 text-center text-xl text-gray-500">{progressText}</p>
+        <p className="mt-0 mb-3 text-center text-md text-gray-500">{progressText}</p>
         <div
           className="relative mx-auto w-full max-w-sm select-none touch-none"
           onTouchStart={(e) => onStart(e.touches[0].clientX)}
